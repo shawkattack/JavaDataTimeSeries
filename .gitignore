@@ -2,6 +2,11 @@
 .idea/
 *.iml
 
+# Eclipse files
+.classpath
+.project
+.settings/
+
 *.class
 
 # Mobile Tools for Java (J2ME)
