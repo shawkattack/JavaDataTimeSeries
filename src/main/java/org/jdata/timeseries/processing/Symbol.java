@@ -11,38 +11,38 @@ import java.util.Objects;
  */
 public class Symbol {
 
-	private int value;
+    private int value;
 
-	private Symbol prev;
-	private Symbol next;
+    private Symbol prev;
+    private Symbol next;
 
-	public Symbol(int aValue) {
+    public Symbol(int value) {
 
-		this.value = aValue;
-		
-		this.prev = null;
-		this.next = null;
-	}
+        this.value = value;
+	
+        this.prev = null;
+        this.next = null;
+    }
 
-	public int getValue() {
+    public int getValue() {
         return value;
     }
 
-	public void setPrev(Symbol prev) {
-		this.prev = prev;
-	}
+    public void setPrev(Symbol prev) {
+        this.prev = prev;
+    }
 
-	public void setNext(Symbol next) {
-		this.next = next;
-	}
+    public void setNext(Symbol next) {
+        this.next = next;
+    }
 
-	public Symbol getPrev() {
-		return prev;
-	}
+    public Symbol getPrev() {
+        return prev;
+    }
 
-	public Symbol getNext() {
-		return next;
-	}
+    public Symbol getNext() {
+        return next;
+    }
 
     @Override
     public boolean equals(Object other) {
