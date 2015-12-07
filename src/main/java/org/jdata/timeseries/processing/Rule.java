@@ -26,8 +26,14 @@ public class Rule {
         this.refCount = refCount - 1;
     }
 
-    public void append(Symbol last) {
-        last = head.getPrev();
+    public void append(Symbol newSymbol) {
+        // Grab a reference to the tail
+        Symbol tail = head.getPrev();
+
+        tail.setNext(newSymbol);
+        head.setPrev(newSymbol);
+        newSymbol.setPrev(tail);
+        newSymbol.setNext(head);
     }
 
     public void reduce(Symbol firstInPair, Rule replacement) {
@@ -51,7 +57,6 @@ public class Rule {
     }
 
     public void expand(Symbol ruleSymbol, Rule replacement) {
-
         // Grab references we might need
         Symbol prev = ruleSymbol.getPrev();
         Symbol next = ruleSymbol.getNext();
@@ -60,9 +65,9 @@ public class Rule {
 
         // Patch in rule
         prev.setNext(left);
-        left.setNext(prev);
+        left.setPrev(prev);
         next.setPrev(right);
-        right.setPrev(next);
+        right.setNext(next);
 
         // Cleanup
         ruleSymbol.setNext(null);
@@ -91,6 +96,7 @@ public class Rule {
             if (cursor.getNext() != head) {
                 b.append(",");
             }
+            cursor = cursor.getNext();
         }
         return b.toString();
     }
