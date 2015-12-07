@@ -6,11 +6,15 @@
 .classpath
 .project
 .settings/
+.metadata/
 
 *.class
 
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
+
+# Maven generated
+target/
 
 # Package Files #
 *.jar
