@@ -7,7 +7,6 @@ import java.util.Objects;
  * Created by David on 12/6/2015.
  */
 public class DigramIndex {
-
     private HashMap<Digram, Symbol> theIndex = new HashMap<>();
 
     public boolean existsInRules(Symbol first) {
