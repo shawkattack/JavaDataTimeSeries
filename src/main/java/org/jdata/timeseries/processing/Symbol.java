@@ -16,12 +16,16 @@ public class Symbol {
     private Symbol prev;
     private Symbol next;
 
+    private Rule containingRule;
+
     public Symbol(int value) {
 
         this.value = value;
 	
         this.prev = null;
         this.next = null;
+
+        this.containingRule = null;
     }
 
     public int getValue() {
@@ -36,12 +40,24 @@ public class Symbol {
         this.next = next;
     }
 
+    public void setContainingRule(Rule containingRule) {
+        this.containingRule = containingRule;
+    }
+
     public Symbol getPrev() {
         return prev;
     }
 
     public Symbol getNext() {
         return next;
+    }
+
+    public Rule getContainingRule() {
+        return containingRule;
+    }
+
+    boolean isGuard() {
+        return value == 0;
     }
 
     @Override

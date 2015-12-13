@@ -21,6 +21,9 @@ public class DigramIndex {
         if (existsInRules(first)) {
             return false;
         }
+        if (first.isGuard() || first.getNext().isGuard()) {
+            return false;
+        }
         theIndex.put(new Digram(first), first);
         return true;
     }

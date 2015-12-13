@@ -16,6 +16,7 @@ public class Rule {
         head = new Symbol(0);
         head.setNext(head);                 
         head.setPrev(head);
+        head.setContainingRule(this);
     }
 
     public void addReference() {
@@ -34,14 +35,20 @@ public class Rule {
         head.setPrev(newSymbol);
         newSymbol.setPrev(tail);
         newSymbol.setNext(head);
+
+        // Assign containing rule
+        newSymbol.setContainingRule(this);
     }
 
-    public void reduce(Symbol firstInPair, Rule replacement) {
+    public Symbol reduce(Symbol firstInPair, Rule replacement) {
         // Grab references we might need and create new symbol
         Symbol secondInPair = firstInPair.getNext();
         Symbol prev = firstInPair.getPrev();
         Symbol next = secondInPair.getNext();
         Symbol newSymbol = new Symbol(replacement.getId());
+
+        // Assign containing rule
+        newSymbol.setContainingRule(this);
 
         // Patch in new symbol
         prev.setNext(newSymbol);
@@ -54,6 +61,9 @@ public class Rule {
         firstInPair.setPrev(null);
         secondInPair.setNext(null);
         secondInPair.setPrev(null);
+
+        // Return the new symbol
+        return newSymbol;
     }
 
     public void expand(Symbol ruleSymbol, Rule replacement) {
@@ -62,6 +72,11 @@ public class Rule {
         Symbol next = ruleSymbol.getNext();
         Symbol left = replacement.head.getNext();
         Symbol right = replacement.head.getPrev();
+
+        // Re-assign containing rule
+        for (Symbol temp = left; temp != replacement.head; temp = temp.getNext()) {
+            temp.setContainingRule(this);
+        }
 
         // Patch in rule
         prev.setNext(left);
@@ -82,6 +97,14 @@ public class Rule {
 
     public int getId() {
         return id;
+    }
+
+    public Symbol getFirst() {
+        return head.getNext();
+    }
+
+    public Symbol getLast() {
+        return head.getPrev();
     }
 
     @Override
