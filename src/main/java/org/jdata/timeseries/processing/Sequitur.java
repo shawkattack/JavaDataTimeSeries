@@ -45,7 +45,7 @@ public class Sequitur {
         Symbol newDigram = newSymbol.getPrev();
 
         // Check if we made a digram at all
-        if (newDigram.isGuard()) {
+        if (!newDigram.isGuard() && !newSymbol.isGuard()) {
             // If the new digram is repeated elsewhere
             if (digramIndex.existsInRules(newDigram)) {
                 // Get the existing digram's first char
@@ -102,6 +102,48 @@ public class Sequitur {
         // Perform any rule expansions before linking newly formed digrams
         // If these replaced rules only have one reference, that reference will be in the new rule
         // These replaced rules cannot contain the symbol for the new rule so this is SAFE
+        /*
+         *  TODO #1
+         *  There's something missing from these if statements:
+         *  I never formed new digram links!
+         *  When you expand a rule, you are replacing a non-terminal Symbol (firstReplaced/secondReplaced)
+         *  with the right side of a Rule. This creates two new links that I didn't account for:
+         *
+         *  1) Between the Symbol BEFORE the replaced Symbol and the first Symbol in the replacing Rule
+         *  2) Between the last Symbol in the replacing Rule and the Symbol AFTER the replaced Symbol
+         *
+         *  Since I've already provided a function called linkToPrevious, you should call this TWICE in EACH if statement.
+         *  The first linkToPrevious can be called on the FIRST Symbol of firstRule/secondRule.
+         *  The second linkToPrevious can be called on the Symbol after firstReplaced/secondReplaced.
+         *  However, you should make these calls AFTER rule.expand has been called.
+         *  I added getFirst and getLast methods to Rule, so you can get the first symbol with first/secondRule.getFirst()
+         *  and the symbol after the replacement with first/secondRule.getLast().getNext().
+         *
+         *  After you finish writing this code, create a new branch on our github repo called bugfix/rule_expansion,
+         *  commit the code, and submit a pull request. I will comment on your code and you should make appropriate
+         *  edits and sync the code again when you think you are done.
+         *  DO NOT merge or close the pull request.
+         */
+        /*
+         *  TODO #2
+         *  When you have successfully finished TODO #1
+         *  Notice that the code in these if statements is almost exactly the same.
+         *  The only things that are different is that firstRule is swapped with secondRule, and firstReplaced is
+         *  swapped with secondRule.
+         *
+         *  Try to make a function (in this class) called expand that takes the following arguments:
+         *  1) Rule toExpand            (rule)
+         *  2) Symbol replacedSymbol    (firstReplaced/secondReplaced)
+         *  3) Rule removedRule         (firstRule/secondRule)
+         *
+         *  and replace the code inside each of the ifs with a single call to this function.
+         *  Feel free to rename the arguments with more fitting names.
+         *
+         *  When you are done, sync the code. I will comment on your changes, and you should make appropriate edits like
+         *  before.
+         *
+         *  When everything looks good, I will let you know, and you should merge the pull request.
+         */
         if (firstRule != null && firstRule.getRefCount() == 1) {
             Symbol firstReplaced = rule.getFirst();
             rule.expand(firstReplaced, firstRule);
