@@ -45,10 +45,9 @@ public class Sequitur {
     /**
      * Performs all the operations that need to occur when we make a link
      * between two symbols. Assumes the new symbol has already been appropriately
-     * added to a rule. If symbol or its previous is null/guard, this does nothing
-     * 
-     * @param symbol
-     *            the new symbol we've added
+     * added to a rule. If symbol or its previous is null/guard, this does nothing.
+     *
+     * @param symbol the new symbol we've added
      */
     private void linkToPrevious(Symbol symbol) {
         // If a symbol gets disconnected, a null
@@ -95,7 +94,7 @@ public class Sequitur {
     /**
      * Replaces a digram with a rule Handles reference counting, and digram
      * linking/unlinking
-     * 
+     *
      * @param digram
      * @param rule
      */
@@ -118,10 +117,10 @@ public class Sequitur {
         Symbol newSymbol = digram.getContainingRule().reduce(digram, rule);
         rule.addReference();
 
+        // If we eliminate all references to a rule EXCEPT the one in the newly formed rule,
+        // we should remove the rule and expand its symbol
         if (firstRule != null && firstRule.getRefCount() == 1) {
-
-            expand(rule.getFirst(), secondRule);
-
+            expand(rule.getFirst(), firstRule);
         }
         if (secondRule != null && secondRule.getRefCount() == 1) {
             expand(rule.getLast(), secondRule);
@@ -132,15 +131,23 @@ public class Sequitur {
         linkToPrevious(newSymbol.getNext());
     }
 
+    /**
+     * Expands a non-terminal symbol into the right side of its rule
+     *
+     * @param replacedSymbol  the non-terminal symbol to be replaced
+     * @param replacementRule the rule to remove/replace the symbol
+     */
     private void expand(Symbol replacedSymbol, Rule replacementRule) {
-
+        // Get these before they're disconnected by expand
         Symbol firstOfNewRule = replacementRule.getFirst();
         Symbol lastOfNewRule = replacementRule.getLast();
 
+        // Perform the list operation and reference counting
         replacedSymbol.getContainingRule().expand(replacedSymbol,
                 replacementRule);
         ruleIndex.remove(replacementRule.getId());
 
+        // Link the newly formed digrams
         linkToPrevious(firstOfNewRule);
         linkToPrevious(lastOfNewRule.getNext());
 
@@ -148,12 +155,12 @@ public class Sequitur {
 
     /**
      * Creates a new rule from a digram
-     * 
-     * @param digram
-     *            the digram to extract a rule from
+     *
+     * @param digram the digram to extract a rule from
      * @return a rule whose right side is the provided digram
      */
     private Rule createNewRule(Symbol digram) {
+        // Book keeping and rule creation
         numRules += 1;
         Rule newRule = new Rule(-numRules);
         int firstValue = digram.getValue();
@@ -162,6 +169,7 @@ public class Sequitur {
         newRule.append(new Symbol(secondValue));
         ruleIndex.put(-numRules, newRule);
 
+        // Book keeping on non-terminal symbols
         if (ruleIndex.containsKey(firstValue)) {
             ruleIndex.get(firstValue).addReference();
         }
@@ -175,8 +183,7 @@ public class Sequitur {
     /**
      * Determines if a digram is a complete rule
      *
-     * @param digram
-     *            the first symbol in the digram
+     * @param digram the first symbol in the digram
      * @return true if a rule's right side is entirely the digram
      */
     private boolean isRule(Symbol digram) {
@@ -188,10 +195,8 @@ public class Sequitur {
      * Determines if the digram STARTING with symbol a overlaps with the diagram
      * ENDING with symbol b
      *
-     * @param a
-     *            the start of the first digram
-     * @param b
-     *            the end of the second digram
+     * @param a the start of the first digram
+     * @param b the end of the second digram
      * @return true if the symbol after a is the exact symbol before b
      */
     private boolean overlap(Symbol a, Symbol b) {

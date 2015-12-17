@@ -118,17 +118,23 @@ public class SequiturTest {
         String doubleDigramResult = ruleSetToString(sequitur.generateRuleSet("abab"));
         Assert.assertEquals("Duplicate digram failed", "1 -> {2}{2},2 -> ab,", doubleDigramResult);
 
-        String exampleTest1Result = ruleSetToString(sequitur.generateRuleSet("abcdbc"));
-        Assert.assertEquals("\"abcdbc\" failed", "1 -> a{2}d{2},2 -> bc,", exampleTest1Result);
+        String quadrupleCharResult = ruleSetToString(sequitur.generateRuleSet("aaaa"));
+        Assert.assertEquals("Quadruple character failed", "1 -> {2}{2},2 -> aa,", quadrupleCharResult);
 
-        String exampleTest2Result = ruleSetToString(sequitur.generateRuleSet("abcdbcabc"));
-        Assert.assertEquals("\"abcdbcabc\" failed", "1 -> {3}d{2}{3},2 -> bc,3 -> a{2},", exampleTest2Result);
+        String separateDoubleDigramResult = ruleSetToString(sequitur.generateRuleSet("abcdbc"));
+        Assert.assertEquals("Non-consecutive double digram failed", "1 -> a{2}d{2},2 -> bc,", separateDoubleDigramResult);
 
-        String exampleTest3Result = ruleSetToString(sequitur.generateRuleSet("abcdbcabcd"));
-        Assert.assertEquals("\"abcdbcabc\" failed", "1 -> {4}{2}{4},2 -> bc,4 -> a{2}d,", exampleTest3Result);
+        String recursiveReplacementResult = ruleSetToString(sequitur.generateRuleSet("abcdbcabc"));
+        Assert.assertEquals("Recursive rule replacement failed", "1 -> {3}d{2}{3},2 -> bc,3 -> a{2},", recursiveReplacementResult);
+
+        String ruleExpansionResult = ruleSetToString(sequitur.generateRuleSet("abcdbcabcd"));
+        Assert.assertEquals("Rule expansion failed", "1 -> {4}{2}{4},2 -> bc,4 -> a{2}d,", ruleExpansionResult);
+
+        String recursiveRuleExpansionResult = ruleSetToString(sequitur.generateRuleSet("afbcdbcafbcd"));
+        Assert.assertEquals("Recursive rule expansion failed", "1 -> {5}{2}{5},2 -> bc,5 -> af{2}d,", recursiveRuleExpansionResult);
     }
 
-    public String ruleSetToString(Collection<Rule> rules) {
+    private String ruleSetToString(Collection<Rule> rules) {
         StringBuilder sb = new StringBuilder();
         for (Rule r : rules) {
             sb.append(r.toString());
