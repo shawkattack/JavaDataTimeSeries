@@ -109,15 +109,14 @@ public class Rule {
 
     @Override
     public String toString() {
-        if (head.getNext() == head) {
-            return "";
-        }
-        StringBuilder b = new StringBuilder();
+        StringBuilder b = new StringBuilder().append(-id).append(" -> ");
         Symbol cursor = head.getNext();
         while (cursor != head) {
-            b.append(cursor.getValue());
-            if (cursor.getNext() != head) {
-                b.append(",");
+            if (cursor.getValue() > 0 && cursor.getValue() <= Character.MAX_VALUE) {
+                b.append((char) cursor.getValue());
+            }
+            else {
+                b.append('{').append(-cursor.getValue()).append('}');
             }
             cursor = cursor.getNext();
         }
