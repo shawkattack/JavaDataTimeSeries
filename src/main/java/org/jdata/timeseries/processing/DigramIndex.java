@@ -58,5 +58,10 @@ public class DigramIndex {
         public int hashCode() {
             return Objects.hash(this.first, this.first.getNext());
         }
+
+        @Override
+        public String toString() {
+            return first.toString() + first.getNext().toString();
+        }
     }
 }
