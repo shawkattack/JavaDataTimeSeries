@@ -9,36 +9,45 @@ public class Sequitur {
     private HashMap<Integer, Rule> ruleIndex;
 
     public Sequitur() {
-        numRules = 1;
-        startRule = new Rule(-1);
-        digramIndex = new DigramIndex();
-        ruleIndex = new HashMap<>();
+        reset();
     }
 
     public Collection<Rule> generateRuleSet(String input) {
+        reset();
+
+        append(input);
+
+        return getCurrentRules();
+    }
+
+    public void reset() {
+        numRules = 1;
+        startRule = new Rule(-1);
         digramIndex = new DigramIndex();
         ruleIndex = new HashMap<>();
-        startRule = new Rule(-1);
         ruleIndex.put(-1, startRule);
-        numRules = 1;
+    }
 
+    public void append(String input) {
         for (int i = 0; i < input.length(); i++) {
-            Symbol newChar = new Symbol(input.charAt(i));
-
-            // Append new input symbol to S
-            startRule.append(newChar);
-            linkToPrevious(newChar);
+            append(input.charAt(i));
         }
+    }
 
+    public void append(char input) {
+        Symbol newChar = new Symbol(input);
+
+        // Append new input symbol to S
+        startRule.append(newChar);
+        linkToPrevious(newChar);
+    }
+
+    public Collection<Rule> getCurrentRules() {
         // Get the results, and sort them descending by ID (actually increasing
         // by creation order)
         List<Rule> result = new ArrayList<>(ruleIndex.values());
         Collections.sort(result, (Rule r1, Rule r2) -> r2.getId() - r1.getId());
 
-        digramIndex = null;
-        ruleIndex = null;
-        startRule = null;
-        numRules = 1;
         return result;
     }
 

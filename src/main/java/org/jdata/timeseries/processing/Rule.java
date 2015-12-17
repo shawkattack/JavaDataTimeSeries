@@ -2,7 +2,6 @@ package org.jdata.timeseries.processing;
 
 /**
  * @author Hunter
- *
  */
 public class Rule {
 
@@ -14,7 +13,7 @@ public class Rule {
         this.id = id;
         refCount = 0;
         head = new Symbol(0);
-        head.setNext(head);                 
+        head.setNext(head);
         head.setPrev(head);
         head.setContainingRule(this);
     }

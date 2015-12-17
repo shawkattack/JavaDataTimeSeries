@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package org.jdata.timeseries.processing;
 
@@ -7,7 +7,6 @@ import java.util.Objects;
 
 /**
  * @author Hunter
- *
  */
 public class Symbol {
 
@@ -21,7 +20,7 @@ public class Symbol {
     public Symbol(int value) {
 
         this.value = value;
-	
+
         this.prev = null;
         this.next = null;
 
@@ -77,10 +76,9 @@ public class Symbol {
 
     @Override
     public String toString() {
-        if(value > 0 && value <= Character.MAX_VALUE) {
+        if (value > 0 && value <= Character.MAX_VALUE) {
             return String.valueOf((char) value);
-        }
-        else {
+        } else {
             return "{" + (-value) + "}";
         }
     }
