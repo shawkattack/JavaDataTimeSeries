@@ -112,12 +112,7 @@ public class Rule {
         StringBuilder b = new StringBuilder().append(-id).append(" -> ");
         Symbol cursor = head.getNext();
         while (cursor != head) {
-            if (cursor.getValue() > 0 && cursor.getValue() <= Character.MAX_VALUE) {
-                b.append((char) cursor.getValue());
-            }
-            else {
-                b.append('{').append(-cursor.getValue()).append('}');
-            }
+            b.append(cursor.toString());
             cursor = cursor.getNext();
         }
         return b.toString();

@@ -75,4 +75,13 @@ public class Symbol {
         return Objects.hashCode(this.value);
     }
 
+    @Override
+    public String toString() {
+        if(value > 0 && value <= Character.MAX_VALUE) {
+            return String.valueOf((char) value);
+        }
+        else {
+            return "{" + (-value) + "}";
+        }
+    }
 }

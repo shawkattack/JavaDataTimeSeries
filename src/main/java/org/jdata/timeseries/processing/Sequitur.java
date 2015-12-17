@@ -33,30 +33,39 @@ public class Sequitur {
         // Get the results, and sort them descending by ID (actually increasing
         // by creation order)
         List<Rule> result = new ArrayList<>(ruleIndex.values());
-        Collections.sort(result, (Rule r1, Rule r2) -> r1.getId() - r2.getId());
+        Collections.sort(result, (Rule r1, Rule r2) -> r2.getId() - r1.getId());
+
+        digramIndex = null;
+        ruleIndex = null;
+        startRule = null;
+        numRules = 1;
         return result;
     }
 
     /**
      * Performs all the operations that need to occur when we make a link
-     * between two symbols Assumes the new symbol has already been appropriately
-     * added to a rule
+     * between two symbols. Assumes the new symbol has already been appropriately
+     * added to a rule. If symbol or its previous is null/guard, this does nothing
      * 
-     * @param newSymbol
+     * @param symbol
      *            the new symbol we've added
      */
-    private void linkToPrevious(Symbol newSymbol) {
-        Symbol newDigram = newSymbol.getPrev();
+    private void linkToPrevious(Symbol symbol) {
+        // If a symbol gets disconnected, a null
+        if (symbol == null) {
+            return;
+        }
+        Symbol newDigram = symbol.getPrev();
 
         // Check if we made a digram at all
-        if (!newDigram.isGuard() && !newSymbol.isGuard()) {
+        if (newDigram != null && !newDigram.isGuard() && !symbol.isGuard()) {
             // If the new digram is repeated elsewhere
             if (digramIndex.existsInRules(newDigram)) {
                 // Get the existing digram's first char
                 Symbol existingDigram = digramIndex.findInRules(newDigram);
 
                 // Only do something if no overlap occurs
-                if (overlap(existingDigram, newSymbol)) {
+                if (!overlap(existingDigram, symbol)) {
                     // If the other occurrence is already a rule, replace with
                     // the symbol for that rule
                     if (isRule(existingDigram)) {
@@ -66,8 +75,12 @@ public class Sequitur {
                     else {
                         Rule newRule = createNewRule(newDigram);
 
+                        digramIndex.removeFromIndex(newDigram);
+
                         reduce(newDigram, newRule);
                         reduce(existingDigram, newRule);
+
+                        digramIndex.addToIndex(newRule.getFirst());
                     }
                 }
             }
