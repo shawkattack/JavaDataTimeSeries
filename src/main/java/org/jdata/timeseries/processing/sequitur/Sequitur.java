@@ -1,4 +1,4 @@
-package org.jdata.timeseries.processing;
+package org.jdata.timeseries.processing.sequitur;
 
 import java.util.*;
 
@@ -6,13 +6,12 @@ public class Sequitur {
     private int numRules;
     private DigramIndex digramIndex;
     private Rule startRule;
-    private HashMap<Integer, Rule> ruleIndex;
 
     public Sequitur() {
         reset();
     }
 
-    public Collection<Rule> generateRuleSet(String input) {
+    public List<Rule> generateRuleSet(String input) {
         reset();
 
         append(input);
@@ -24,8 +23,6 @@ public class Sequitur {
         numRules = 1;
         startRule = new Rule(-1);
         digramIndex = new DigramIndex();
-        ruleIndex = new HashMap<>();
-        ruleIndex.put(-1, startRule);
     }
 
     public void append(String input) {
@@ -35,18 +32,33 @@ public class Sequitur {
     }
 
     public void append(char input) {
-        Symbol newChar = new Symbol(input);
+        Symbol newChar = new TerminalSymbol(input);
 
         // Append new input symbol to S
         startRule.append(newChar);
         linkToPrevious(newChar);
     }
 
-    public Collection<Rule> getCurrentRules() {
-        // Get the results, and sort them descending by ID (actually increasing
-        // by creation order)
-        List<Rule> result = new ArrayList<>(ruleIndex.values());
-        Collections.sort(result, (Rule r1, Rule r2) -> r2.getId() - r1.getId());
+    public List<Rule> getCurrentRules() {
+        ArrayList<Rule> result = new ArrayList<>();
+        Deque<Rule> queue = new LinkedList<>();
+        HashSet<Rule> visitedRules = new HashSet<>();
+
+        queue.add(startRule);
+        result.add(startRule);
+
+        while (!queue.isEmpty()) {
+            Rule r = queue.removeFirst();
+            for (Symbol cursor = r.getFirst(); !cursor.isGuard(); cursor = cursor.getNext()) {
+                if (cursor.isNonTerminal()) {
+                    Rule cursorRule = ((NonTerminalSymbol) cursor).getAssociatedRule();
+                    if (visitedRules.add(cursorRule)) {
+                        result.add(cursorRule);
+                        queue.add(cursorRule);
+                    }
+                }
+            }
+        }
 
         return result;
     }
@@ -113,13 +125,13 @@ public class Sequitur {
         digramIndex.removeFromIndex(digram.getNext());
 
         // Decrement rule references for any non-terminal symbols being replaced
-        Rule firstRule = ruleIndex.get(digram.getValue());
-        Rule secondRule = ruleIndex.get(digram.getNext().getValue());
-        if (firstRule != null) {
-            firstRule.removeReference();
+        NonTerminalSymbol first = digram.isNonTerminal() ? (NonTerminalSymbol) digram : null;
+        NonTerminalSymbol second = digram.getNext().isNonTerminal() ? (NonTerminalSymbol) digram.getNext() : null;
+        if (first != null) {
+            first.getAssociatedRule().removeReference();
         }
-        if (secondRule != null) {
-            secondRule.removeReference();
+        if (second != null) {
+            second.getAssociatedRule().removeReference();
         }
 
         // Perform the reduce operation and increment the reference count
@@ -128,11 +140,11 @@ public class Sequitur {
 
         // If we eliminate all references to a rule EXCEPT the one in the newly formed rule,
         // we should remove the rule and expand its symbol
-        if (firstRule != null && firstRule.getRefCount() == 1) {
-            expand(rule.getFirst(), firstRule);
+        if (first != null && first.getAssociatedRule().getRefCount() == 1) {
+            expand(rule.getFirst(), first.getAssociatedRule());
         }
-        if (secondRule != null && secondRule.getRefCount() == 1) {
-            expand(rule.getLast(), secondRule);
+        if (second != null && second.getAssociatedRule().getRefCount() == 1) {
+            expand(rule.getLast(), second.getAssociatedRule());
         }
 
         // Add the newly created digrams, and perform the associated operations
@@ -154,7 +166,6 @@ public class Sequitur {
         // Perform the list operation and reference counting
         replacedSymbol.getContainingRule().expand(replacedSymbol,
                 replacementRule);
-        ruleIndex.remove(replacementRule.getId());
 
         // Link the newly formed digrams
         linkToPrevious(firstOfNewRule);
@@ -172,18 +183,23 @@ public class Sequitur {
         // Book keeping and rule creation
         numRules += 1;
         Rule newRule = new Rule(-numRules);
-        int firstValue = digram.getValue();
-        int secondValue = digram.getNext().getValue();
-        newRule.append(new Symbol(firstValue));
-        newRule.append(new Symbol(secondValue));
-        ruleIndex.put(-numRules, newRule);
+        Symbol first = digram;
+        Symbol second = digram.getNext();
+        Symbol newFirst = first.isTerminal() ?
+                new TerminalSymbol((char) first.getValue()) :
+                new NonTerminalSymbol(((NonTerminalSymbol) first).getAssociatedRule());
+        Symbol newSecond = second.isTerminal() ?
+                new TerminalSymbol((char) second.getValue()) :
+                new NonTerminalSymbol(((NonTerminalSymbol) second).getAssociatedRule());
+        newRule.append(newFirst);
+        newRule.append(newSecond);
 
         // Book keeping on non-terminal symbols
-        if (ruleIndex.containsKey(firstValue)) {
-            ruleIndex.get(firstValue).addReference();
+        if (newFirst.isNonTerminal()) {
+            ((NonTerminalSymbol) newFirst).getAssociatedRule().addReference();
         }
-        if (ruleIndex.containsKey(secondValue)) {
-            ruleIndex.get(secondValue).addReference();
+        if (newSecond.isNonTerminal()) {
+            ((NonTerminalSymbol) newSecond).getAssociatedRule().addReference();
         }
 
         return newRule;

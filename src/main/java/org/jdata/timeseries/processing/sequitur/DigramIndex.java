@@ -1,4 +1,4 @@
-package org.jdata.timeseries.processing;
+package org.jdata.timeseries.processing.sequitur;
 
 import java.util.HashMap;
 import java.util.Objects;
@@ -6,7 +6,7 @@ import java.util.Objects;
 /**
  * Created by David on 12/6/2015.
  */
-public class DigramIndex {
+class DigramIndex {
     private HashMap<Digram, Symbol> theIndex = new HashMap<>();
 
     public boolean existsInRules(Symbol first) {

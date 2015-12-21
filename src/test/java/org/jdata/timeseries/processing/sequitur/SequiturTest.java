@@ -1,11 +1,10 @@
-package org.jdata.timeseries.test;
+package org.jdata.timeseries.processing.sequitur;
 
-import org.jdata.timeseries.processing.Rule;
-import org.jdata.timeseries.processing.Sequitur;
-import org.jdata.timeseries.processing.Symbol;
 import org.junit.*;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 public class SequiturTest {
     @Before
@@ -14,9 +13,9 @@ public class SequiturTest {
 
     @Test
     public void testSymbolEquals() {
-        Symbol s1 = new Symbol(67);
-        Symbol s2 = new Symbol(67);
-        Symbol s3 = new Symbol(-1);
+        Symbol s1 = new TerminalSymbol('a');
+        Symbol s2 = new TerminalSymbol('a');
+        Symbol s3 = new NonTerminalSymbol(new Rule(-1));
         Assert.assertEquals(s1, s2);
         Assert.assertNotEquals(s1, s3);
         Assert.assertNotEquals(s2, s3);
@@ -26,11 +25,11 @@ public class SequiturTest {
     public void testRuleAppend() {
         Rule r = new Rule(-1);
         Assert.assertEquals("toString failed", "1 -> ", r.toString());
-        r.append(new Symbol('a'));
+        r.append(new TerminalSymbol('a'));
         Assert.assertEquals("first append failed", "1 -> a", r.toString());
-        r.append(new Symbol('b'));
+        r.append(new TerminalSymbol('b'));
         Assert.assertEquals("second append failed", "1 -> ab", r.toString());
-        r.append(new Symbol('c'));
+        r.append(new TerminalSymbol('c'));
         Assert.assertEquals("final append failed", "1 -> abc", r.toString());
     }
 
@@ -50,9 +49,9 @@ public class SequiturTest {
 
     @Test
     public void testRuleReduce() {
-        Symbol a = new Symbol('a');
-        Symbol b = new Symbol('b');
-        Symbol c = new Symbol('c');
+        Symbol a = new TerminalSymbol('a');
+        Symbol b = new TerminalSymbol('b');
+        Symbol c = new TerminalSymbol('c');
         Rule r1 = new Rule(-1);
         r1.append(a);
         r1.append(b);
@@ -70,26 +69,26 @@ public class SequiturTest {
 
     @Test
     public void testRuleExpand() {
-        Symbol A = new Symbol(-2);
-        Symbol B = new Symbol(-3);
-        Symbol C = new Symbol(-4);
-        Symbol a1 = new Symbol('a');
-        Symbol a2 = new Symbol('a');
-        Symbol b2 = new Symbol('b');
-        Symbol c2 = new Symbol('c');
+        Rule r2 = new Rule(-2);
+        Rule r3 = new Rule(-3);
+        Rule r4 = new Rule(-4);
+        Symbol A = new NonTerminalSymbol(r2);
+        Symbol B = new NonTerminalSymbol(r3);
+        Symbol C = new NonTerminalSymbol(r4);
+        Symbol a1 = new TerminalSymbol('a');
+        Symbol a2 = new TerminalSymbol('a');
+        Symbol b2 = new TerminalSymbol('b');
+        Symbol c2 = new TerminalSymbol('c');
         Rule r1 = new Rule(-1);
         r1.append(A);
         Assume.assumeTrue("append failed", "1 -> {2}".equals(r1.toString()));
-        Rule r2 = new Rule(-2);
         r2.append(B);
         r1.expand(A, r2);
         Assert.assertEquals("first expand failed", "1 -> {3}", r1.toString());
-        Rule r3 = new Rule(-3);
         r3.append(a1);
         r3.append(C);
         r1.expand(B, r3);
         Assert.assertEquals("second expand failed", "1 -> a{4}", r1.toString());
-        Rule r4 = new Rule(-4);
         r4.append(a2);
         r4.append(b2);
         r4.append(c2);
@@ -134,7 +133,8 @@ public class SequiturTest {
         Assert.assertEquals("Recursive rule expansion failed", "1 -> {5}{2}{5},2 -> bc,5 -> af{2}d,", recursiveRuleExpansionResult);
     }
 
-    private String ruleSetToString(Collection<Rule> rules) {
+    private String ruleSetToString(List<Rule> rules) {
+        Collections.sort(rules, (Rule r1, Rule r2) -> r2.getId() - r1.getId());
         StringBuilder sb = new StringBuilder();
         for (Rule r : rules) {
             sb.append(r.toString());

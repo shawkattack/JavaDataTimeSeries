@@ -1,10 +1,9 @@
-package org.jdata.timeseries.processing;
+package org.jdata.timeseries.processing.sequitur;
 
 /**
  * @author Hunter
  */
 public class Rule {
-
     private int id;
     private int refCount;
     private Symbol head;
@@ -12,21 +11,21 @@ public class Rule {
     public Rule(int id) {
         this.id = id;
         refCount = 0;
-        head = new Symbol(0);
+        head = new GuardSymbol();
         head.setNext(head);
         head.setPrev(head);
         head.setContainingRule(this);
     }
 
-    public void addReference() {
+    void addReference() {
         this.refCount = refCount + 1;
     }
 
-    public void removeReference() {
+    void removeReference() {
         this.refCount = refCount - 1;
     }
 
-    public void append(Symbol newSymbol) {
+    void append(Symbol newSymbol) {
         // Grab a reference to the tail
         Symbol tail = head.getPrev();
 
@@ -39,12 +38,12 @@ public class Rule {
         newSymbol.setContainingRule(this);
     }
 
-    public Symbol reduce(Symbol firstInPair, Rule replacement) {
+    Symbol reduce(Symbol firstInPair, Rule replacement) {
         // Grab references we might need and create new symbol
         Symbol secondInPair = firstInPair.getNext();
         Symbol prev = firstInPair.getPrev();
         Symbol next = secondInPair.getNext();
-        Symbol newSymbol = new Symbol(replacement.getId());
+        Symbol newSymbol = new NonTerminalSymbol(replacement);
 
         // Assign containing rule
         newSymbol.setContainingRule(this);
@@ -65,7 +64,7 @@ public class Rule {
         return newSymbol;
     }
 
-    public void expand(Symbol ruleSymbol, Rule replacement) {
+    void expand(Symbol ruleSymbol, Rule replacement) {
         // Grab references we might need
         Symbol prev = ruleSymbol.getPrev();
         Symbol next = ruleSymbol.getNext();
@@ -90,7 +89,7 @@ public class Rule {
         replacement.head.setPrev(null);
     }
 
-    public int getRefCount() {
+    int getRefCount() {
         return refCount;
     }
 
@@ -110,7 +109,7 @@ public class Rule {
     public String toString() {
         StringBuilder b = new StringBuilder().append(-id).append(" -> ");
         Symbol cursor = head.getNext();
-        while (cursor != head) {
+        while (!cursor.isGuard()) {
             b.append(cursor.toString());
             cursor = cursor.getNext();
         }

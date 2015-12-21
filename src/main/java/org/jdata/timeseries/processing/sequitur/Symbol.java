@@ -1,7 +1,7 @@
 /**
  *
  */
-package org.jdata.timeseries.processing;
+package org.jdata.timeseries.processing.sequitur;
 
 import java.util.Objects;
 
@@ -9,7 +9,6 @@ import java.util.Objects;
  * @author Hunter
  */
 public class Symbol {
-
     private int value;
 
     private Symbol prev;
@@ -18,7 +17,6 @@ public class Symbol {
     private Rule containingRule;
 
     public Symbol(int value) {
-
         this.value = value;
 
         this.prev = null;
@@ -31,15 +29,15 @@ public class Symbol {
         return value;
     }
 
-    public void setPrev(Symbol prev) {
+    void setPrev(Symbol prev) {
         this.prev = prev;
     }
 
-    public void setNext(Symbol next) {
+    void setNext(Symbol next) {
         this.next = next;
     }
 
-    public void setContainingRule(Rule containingRule) {
+    void setContainingRule(Rule containingRule) {
         this.containingRule = containingRule;
     }
 
@@ -51,12 +49,20 @@ public class Symbol {
         return next;
     }
 
-    public Rule getContainingRule() {
-        return containingRule;
+    public boolean isGuard() {
+        return false;
     }
 
-    boolean isGuard() {
-        return value == 0;
+    public boolean isTerminal() {
+        return false;
+    }
+
+    public boolean isNonTerminal() {
+        return false;
+    }
+
+    public Rule getContainingRule() {
+        return containingRule;
     }
 
     @Override
@@ -72,14 +78,5 @@ public class Symbol {
     @Override
     public int hashCode() {
         return Objects.hashCode(this.value);
-    }
-
-    @Override
-    public String toString() {
-        if (value > 0 && value <= Character.MAX_VALUE) {
-            return String.valueOf((char) value);
-        } else {
-            return "{" + (-value) + "}";
-        }
     }
 }
